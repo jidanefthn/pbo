@@ -1,0 +1,37 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import HomePage from './pages/HomePage';
+import MovieDetailPage from './pages/MovieDetailPage';
+import BookingPage from './pages/BookingPage';
+import AdminMoviePage from './pages/AdminMoviePage';
+import LoginPage from './pages/LoginPage'; 
+import EditMoviePage from './pages/EditMoviePage'; 
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        
+        {/* Rute Autentikasi Pengguna */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Rute Film & Dashboard Admin */}
+        <Route path="/movie/:id" element={<MovieDetailPage />} /> 
+        <Route path="/admin/movies" element={<AdminMoviePage />} />
+        <Route path="/booking/:id" element={<BookingPage />} />
+        <Route path="/admin/edit-movie/:id" element={<EditMoviePage />} />
+
+        {/* 404 Handler */}
+        <Route 
+          path="*" 
+          element={
+            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <h1 style={{ color: 'red' }}>404 - Halaman Tidak Ditemukan</h1>
+            </div>
+          } 
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
