@@ -7,6 +7,8 @@ import BookingPage from './pages/BookingPage';
 import AdminMoviePage from './pages/AdminMoviePage';
 import LoginPage from './pages/LoginPage'; 
 import EditMoviePage from './pages/EditMoviePage'; 
+import AddMoviePage from './pages/AddMoviePage';
+import AllMoviesPage from './pages/AllMoviePage';
 export default function App() {
   return (
     <BrowserRouter>
@@ -21,6 +23,8 @@ export default function App() {
         <Route path="/admin/movies" element={<AdminMoviePage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/admin/edit-movie/:id" element={<EditMoviePage />} />
+        <Route path="/admin/add-movie" element={<AddMoviePage />} />
+        <Route path="/all-movies" element={<AllMoviesPage />} />
 
         {/* 404 Handler */}
         <Route 

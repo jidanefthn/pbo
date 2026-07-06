@@ -17,19 +17,43 @@ export default function EditMoviePage() {
   useEffect(() => {
     fetch(`http://localhost:3000/api/movies/${id}`)
       .then(res => res.json())
-      .then(data => setMovie(data.movie))
+      .then(data => {
+        if (data.success) {
+          setMovie(data.movie);
+        }
+      })
       .catch(err => console.error("Gagal memuat data:", err));
   }, [id]);
 
+  // Fungsi submit yang sudah diperketat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch(`http://localhost:3000/api/movies/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(movie)
-    });
-    alert('Film berhasil diperbarui!');
-    navigate('/admin/movies');
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`http://localhost:3000/api/movies/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(movie)
+      });
+
+      // Validasi apakah server benar-benar menyimpan data
+      if (response.ok) {
+        alert('Film berhasil diperbarui!');
+        navigate('/admin/movies'); // Hanya pindah halaman jika sukses
+      } else if (response.status === 401 || response.status === 403) {
+        alert('Gagal: Sesi Anda habis atau tidak memiliki akses (Unauthorized).');
+      } else {
+        alert('Gagal memperbarui film. Pastikan format data sudah benar.');
+      }
+    } catch (err) {
+      console.error("Error updating movie:", err);
+      alert('Terjadi kesalahan koneksi ke server.');
+    }
   };
 
   return (

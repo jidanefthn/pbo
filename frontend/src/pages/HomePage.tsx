@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Loader2, Ticket, LogOut } from 'lucide-react'; // <-- Menambahkan icon Ticket dan LogOut
+import { ChevronLeft, ChevronRight, Loader2, Ticket, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logoImage from '../assets/logo.png'; 
 import promo1 from '../assets/promo1.jpg';
@@ -23,13 +23,12 @@ export default function HomePage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllMovies, setShowAllMovies] = useState(false);
 
   // ==========================================
   // 1. STATE UNTUK MENGECEK STATUS LOGIN
   // ==========================================
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // STATE BARU UNTUK MENAMPILKAN MODAL KONFIRMASI
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
@@ -39,26 +38,26 @@ export default function HomePage() {
     }
   }, []);
 
-  // Fungsi saat tombol "Logout" di navbar diklik (Hanya memunculkan pop-up)
   const triggerLogout = () => {
     setShowLogoutConfirm(true);
   };
 
-  // Fungsi yang BENAR-BENAR menghapus sesi login
   const confirmLogout = () => {
     localStorage.removeItem('token'); 
     setIsLoggedIn(false); 
-    setShowLogoutConfirm(false); // Tutup pop-up
+    setShowLogoutConfirm(false); 
     navigate('/'); 
   };
 
-  // Fungsi untuk Logout
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Hapus kunci akses
-    setIsLoggedIn(false); // Ubah status menjadi belum login
-    navigate('/'); // Refresh ke beranda
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/');
   };
 
+  // ==========================================
+  // 2. REFERENSI & LOGIKA SLIDER PROMO
+  // ==========================================
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const handleNextPromo = () => {
@@ -101,6 +100,26 @@ export default function HomePage() {
     return () => clearInterval(slideInterval);
   }, []);
 
+  // ==========================================
+  // 3. REFERENSI & LOGIKA SLIDER FILM (BARU)
+  // ==========================================
+  const movieGridRef = useRef<HTMLDivElement>(null);
+
+  const handleNextMovies = () => {
+    if (movieGridRef.current) {
+      movieGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevMovies = () => {
+    if (movieGridRef.current) {
+      movieGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  // ==========================================
+  // 4. FETCH DATA FILM
+  // ==========================================
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -125,7 +144,7 @@ export default function HomePage() {
   return (
     <div className="app-container">
 
-      {/* 1. NAVBAR DENGAN LOGIKA LOGIN */}
+      {/* NAVBAR */}
       <nav className="navbar" style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -140,6 +159,7 @@ export default function HomePage() {
           alt="TIXCO Logo" 
           className="nav-logo" 
           onClick={() => navigate('/')} 
+          style={{ cursor: 'pointer' }}
         />
 
         <div className="nav-menu">
@@ -153,29 +173,21 @@ export default function HomePage() {
             <span>Promo</span>
           </div>
 
-          {/* ==========================================
-              KONDISI JIKA USER SUDAH LOGIN
-          ========================================== */}
           {isLoggedIn ? (
             <>
-              {/* Tombol Logout */}
-              <div className="nav-item" onClick={handleLogout} style={{ color: '#ef4444' }}>
+              <div className="nav-item" onClick={handleLogout} style={{ color: '#ef4444', cursor: 'pointer' }}>
                 <LogOut size={20} />
                 <span>Logout</span>
               </div>
               
-              {/* Tombol Riwayat Tiket menggantikan Buat Akun */}
               <button className="btn-register-nav" onClick={() => navigate('/history')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Ticket size={18} />
                 Riwayat Tiket
               </button>
             </>
           ) : (
-          /* ==========================================
-              KONDISI JIKA USER BELUM LOGIN
-          ========================================== */
             <>
-              <div className="nav-item" onClick={() => navigate('/login')}>
+              <div className="nav-item" onClick={() => navigate('/login')} style={{ cursor: 'pointer' }}>
                 <span>Login</span>
               </div>
               <button className="btn-register-nav" onClick={() => navigate('/login')}>
@@ -183,11 +195,10 @@ export default function HomePage() {
               </button>
             </>
           )}
-
         </div>
       </nav>
 
-      {/* 2. AREA PENCARIAN */}
+      {/* AREA PENCARIAN */}
       <section className="hero-search-section">
         <h1 className="hero-title">Feel the meanings beyond</h1>
         <div className="search-input-wrapper">
@@ -198,9 +209,28 @@ export default function HomePage() {
           <input type="text" placeholder="Cari film atau bioskop" className="search-input" />
         </div>
       </section>
-      {/* 4. NOW SHOWING IN CINEMAS */}
-    <section className="movies-section">
-        <h2 className="section-title">NOW SHOWING IN CINEMAS</h2>
+
+      {/* NOW SHOWING IN CINEMAS */}
+      <section className="movies-section">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '0 40px' }}>
+          <h2 className="section-title" style={{ margin: 0 }}>NOW SHOWING IN CINEMAS</h2>
+          
+          {/* 🌟 1. Ubah logika tombol onClick dan teksnya */}
+          <button 
+            onClick={() => setShowAllMovies(!showAllMovies)} 
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: '#82ebd5', 
+              fontWeight: 'bold', 
+              fontSize: '16px', 
+              cursor: 'pointer' 
+            }}
+          >
+            {showAllMovies ? 'Tampilkan Lebih Sedikit' : 'Show All'}
+          </button>
+        </div>
+
         {isLoading ? (
           <div className="loading-state">
             <Loader2 className="spinner" size={40} />
@@ -210,8 +240,13 @@ export default function HomePage() {
           <div className="error-state">{error}</div>
         ) : (
           <div className="movies-container">
-            <div className="movie-grid">
-              {movies.slice(0, 4).map((movie) => (
+            
+            {/* 🌟 2. Ubah class secara dinamis berdasarkan state */}
+            <div 
+              className={showAllMovies ? "all-movies-grid page-transition" : "movie-grid page-transition"} 
+              ref={!showAllMovies ? movieGridRef : null}
+            >
+              {movies.map((movie) => (
                 <div key={movie.id} className="movie-card" onClick={() => navigate(`/movie/${movie.id}`)}>
                   <div className="movie-poster">
                     <img src={movie.posterUrl || 'https://placehold.co/400x600/eeeeee/999999?text=NO+POSTER'} alt={movie.title} />
@@ -221,21 +256,19 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="slider-nav">
-              <button className="nav-btn"><ChevronLeft size={18} /></button>
-              <div className="slider-dots">
-                <div className="dot active"></div>
-                <div className="dot"></div>
-                <div className="dot"></div>
-                <div className="dot"></div>
+            {/* 🌟 3. Sembunyikan tombol panah kiri-kanan jika mode "Show All" sedang aktif */}
+            {!showAllMovies && (
+              <div className="slider-nav page-transition">
+                <button className="nav-btn" onClick={handlePrevMovies}><ChevronLeft size={18} /></button>
+                <button className="nav-btn" onClick={handleNextMovies}><ChevronRight size={18} /></button>
               </div>
-              <button className="nav-btn"><ChevronRight size={18} /></button>
-            </div>
+            )}
+            
           </div>
         )}
       </section>
 
-      {/* 5. FOOTER */}
+      {/* FOOTER */}
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-brand">

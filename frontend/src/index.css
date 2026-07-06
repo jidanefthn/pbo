@@ -63,9 +63,11 @@ body {
 .movie-grid {
   display: flex !important;
   gap: 20px;
-  overflow-x: auto !important; /* Penting untuk mengaktifkan scroll horizontal */
+  overflow-x: auto; /* Mengaktifkan scroll horizontal */
   scroll-behavior: smooth;
-  padding: 10px 0;
+  padding: 10px 40px; /* Menyesuaikan padding kiri-kanan */
+  
+  /* Sembunyikan scrollbar bawaan agar terlihat rapi */
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -75,7 +77,8 @@ body {
 }
 
 .movie-card {
-  flex: 0 0 220px; /* Lebar tetap untuk kartu */
+  flex: 0 0 220px; /* Memaksa ukuran kartu tetap (tidak menyusut) saat di-scroll */
+  cursor: pointer;
 }
 
 
@@ -1264,3 +1267,34 @@ body, .app-container {
   background: #111827; padding: 20px; display: flex; justify-content: space-between;
 }
 .btn-pay { background: #82ebd5; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+/* Tata letak untuk mode Show All di Beranda */
+/* Tata letak untuk mode Show All di Beranda */
+.all-movies-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 🌟 Mengatur persis 5 kolom/film per baris */
+  gap: 30px; /* Jarak antar film */
+  padding: 10px 40px; 
+}
+
+/* Mematikan efek flex agar turun ke bawah secara proporsional */
+.all-movies-grid .movie-card {
+  flex: none;
+  width: 100%;
+}
+
+/* 🌟 TAMBAHAN: Responsif untuk layar kecil */
+/* Agar tampilan tidak hancur saat dibuka di tablet atau HP */
+@media (max-width: 1024px) {
+  .all-movies-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 film per baris untuk tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .all-movies-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 film per baris untuk HP */
+    gap: 15px; 
+    padding: 10px 20px;
+  }
+}
