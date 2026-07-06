@@ -14,9 +14,19 @@ export default function AdminStudioPage() {
     status: 'Tersedia'
   });
 
-  // --- 🌟 STATE MODAL JADWAL ---
+  // --- STATE MODAL TAMBAH JADWAL ---
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [scheduleFormData, setScheduleFormData] = useState({
+    movieTitle: '',
+    studioName: '',
+    date: '',
+    time: ''
+  });
+
+  // --- 🌟 STATE MODAL EDIT JADWAL ---
+  const [showEditScheduleModal, setShowEditScheduleModal] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState({
+    id: 0,
     movieTitle: '',
     studioName: '',
     date: '',
@@ -60,7 +70,7 @@ export default function AdminStudioPage() {
     }
   };
 
-  // --- 🌟 FUNGSI SUBMIT JADWAL ---
+  // --- FUNGSI SUBMIT JADWAL BARU ---
   const handleScheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newSchedule = {
@@ -71,19 +81,30 @@ export default function AdminStudioPage() {
       time: scheduleFormData.time
     };
     setSchedules([...schedules, newSchedule]);
-    
-    // Reset form dan tutup modal
     setScheduleFormData({ movieTitle: '', studioName: '', date: '', time: '' });
     setShowScheduleForm(false);
   };
 
-  const handleEditSchedule = (id: number) => {
-    const current = schedules.find(s => s.id === id);
-    if (!current) return;
-    const newTime = window.prompt("Ubah Jam Tayang:", current.time);
-    if (newTime) {
-      setSchedules(schedules.map(s => s.id === id ? { ...s, time: newTime } : s));
-    }
+  // --- 🌟 FUNGSI MEMBUKA FORM EDIT JADWAL ---
+  const handleOpenEditSchedule = (sch: any) => {
+    setEditingSchedule({
+      id: sch.id,
+      movieTitle: sch.movieTitle,
+      studioName: sch.studioName,
+      date: sch.date,
+      time: sch.time
+    });
+    setShowEditScheduleModal(true);
+  };
+
+  // --- 🌟 FUNGSI SIMPAN PERUBAHAN EDIT JADWAL ---
+  const handleEditScheduleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSchedules(schedules.map(sch => 
+      sch.id === editingSchedule.id ? { ...editingSchedule } : sch
+    ));
+    setShowEditScheduleModal(false);
+    alert("Jadwal film berhasil diperbarui!");
   };
 
   const handleDeleteSchedule = (id: number) => {
@@ -142,64 +163,103 @@ export default function AdminStudioPage() {
         </div>
 
         {/* TAMPILAN TAB 1: KELOLA STUDIO */}
-        {activeTab === 'studio' && (
-          <div className="page-transition">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Daftar Studio Bioskop</h3>
-              <button className="btn-add" onClick={() => setShowStudioForm(true)}>
-                <Plus size={18} /> Tambah Studio
-              </button>
-            </div>
+{activeTab === 'studio' && (
+  <div className="page-transition">
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+      }}
+    >
+      <h3>Daftar Studio Bioskop</h3>
 
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nama Studio</th>
-                    <th>Status Ketersediaan</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {studios.map((s) => (
-                    <tr key={s.id}>
-                      <td>{s.name}</td>
-                      <td>
-                        <span style={{
-                          padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold',
-                          backgroundColor: s.status === 'Tersedia' ? '#064e3b' : '#7f1d1d',
-                          color: s.status === 'Tersedia' ? '#34d399' : '#f87171'
-                        }}>
-                          {s.status}
-                        </span>
-                      </td>
-                      <td className="actions">
-                        <button 
-                          className="btn-edit" 
-                          onClick={() => handleToggleStatus(s.id, s.status)}
-                          title="Ubah Status Ketersediaan"
-                          style={{ backgroundColor: '#1e293b', color: '#38bdf8' }}
-                        >
-                          {s.status === 'Tersedia' ? <X size={16} /> : <Check size={16} />}
-                        </button>
-                        <button className="btn-delete" onClick={() => handleDeleteStudio(s.id, s.name)}>
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+      <button
+        className="btn-add"
+        onClick={() => setShowStudioForm(true)}
+      >
+        <Plus size={18} /> Tambah Studio
+      </button>
+    </div>
+
+    <div className="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Studio</th>
+            <th>Status Ketersediaan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {studios.map((s) => (
+            <tr key={s.id}>
+              <td>{s.name}</td>
+
+              <td>
+                <span
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    backgroundColor:
+                      s.status === 'Tersedia'
+                        ? '#064e3b'
+                        : '#7f1d1d',
+                    color:
+                      s.status === 'Tersedia'
+                        ? '#34d399'
+                        : '#f87171',
+                  }}
+                >
+                  {s.status}
+                </span>
+              </td>
+
+              <td className="actions">
+                <button
+                  className="btn-edit"
+                  onClick={() =>
+                    handleToggleStatus(s.id, s.status)
+                  }
+                  title="Ubah Status Ketersediaan"
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#38bdf8',
+                  }}
+                >
+                  {s.status === 'Tersedia' ? (
+                    <X size={16} />
+                  ) : (
+                    <Check size={16} />
+                  )}
+                </button>
+
+                <button
+                  className="btn-delete"
+                  onClick={() =>
+                    handleDeleteStudio(s.id, s.name)
+                  }
+                >
+                  <Trash2 size={16} />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
 
         {/* TAMPILAN TAB 2: KELOLA JADWAL */}
         {activeTab === 'jadwal' && (
           <div className="page-transition">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3>Jadwal Penayangan Aktif</h3>
-              {/* 🌟 Tombol ini memunculkan Modal Jadwal */}
               <button className="btn-add" onClick={() => setShowScheduleForm(true)}>
                 <Plus size={18} /> Tambah Jadwal
               </button>
@@ -224,7 +284,8 @@ export default function AdminStudioPage() {
                       <td>{sch.date}</td>
                       <td style={{ color: '#82ebd5', fontWeight: 'bold' }}>{sch.time} WIB</td>
                       <td className="actions">
-                        <button className="btn-edit" onClick={() => handleEditSchedule(sch.id)}>
+                        {/* 🌟 Tombol edit dihubungkan ke fungsi pembuka modal edit */}
+                        <button className="btn-edit" onClick={() => handleOpenEditSchedule(sch)}>
                           <Edit2 size={16} />
                         </button>
                         <button className="btn-delete" onClick={() => handleDeleteSchedule(sch.id)}>
@@ -241,35 +302,14 @@ export default function AdminStudioPage() {
 
         {/* MODAL FORM TAMBAH STUDIO */}
         {showStudioForm && (
-          <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: '#0b0f19', padding: '30px', borderRadius: '12px',
-              width: '100%', maxWidth: '500px', border: '1px solid #1f2937'
-            }} className="page-transition">
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ backgroundColor: '#0b0f19', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '500px', border: '1px solid #1f2937' }} className="page-transition">
               <h2 style={{ marginTop: 0, marginBottom: '20px' }}>Tambah Studio Baru</h2>
               <form onSubmit={handleStudioSubmit} className="admin-form">
                 <label>Nama Studio</label>
-                <input 
-                  type="text" 
-                  value={studioFormData.name} 
-                  onChange={e => setStudioFormData({...studioFormData, name: e.target.value})} 
-                  placeholder="Contoh: Studio 4 IMAX" required style={{ marginBottom: '20px' }}
-                />
+                <input type="text" value={studioFormData.name} onChange={e => setStudioFormData({...studioFormData, name: e.target.value})} placeholder="Contoh: Studio 4 IMAX" required style={{ marginBottom: '20px' }} />
                 <label>Status Ketersediaan</label>
-                <select 
-                  value={studioFormData.status}
-                  onChange={e => setStudioFormData({...studioFormData, status: e.target.value})}
-                  required
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '8px', 
-                    backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', 
-                    outline: 'none', marginBottom: '30px', fontSize: '15px'
-                  }}
-                >
+                <select value={studioFormData.status} onChange={e => setStudioFormData({...studioFormData, status: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none', marginBottom: '30px', fontSize: '15px' }}>
                   <option value="Tersedia">Tersedia</option>
                   <option value="Tidak Tersedia">Tidak Tersedia</option>
                 </select>
@@ -282,43 +322,68 @@ export default function AdminStudioPage() {
           </div>
         )}
 
-        {/* 🌟 MODAL FORM TAMBAH JADWAL */}
+        {/* MODAL FORM TAMBAH JADWAL */}
         {showScheduleForm && (
-          <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: '#0b0f19', padding: '30px', borderRadius: '12px',
-              width: '100%', maxWidth: '500px', border: '1px solid #1f2937'
-            }} className="page-transition">
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ backgroundColor: '#0b0f19', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '500px', border: '1px solid #1f2937' }} className="page-transition">
               <h2 style={{ marginTop: 0, marginBottom: '20px' }}>Tambah Jadwal Tayang</h2>
               <form onSubmit={handleScheduleSubmit} className="admin-form">
+                <label>Judul Film</label>
+                <input type="text" value={scheduleFormData.movieTitle} onChange={e => setScheduleFormData({...scheduleFormData, movieTitle: e.target.value})} placeholder="Contoh: Petaka Gunung Welirang" required style={{ marginBottom: '15px' }} />
+                <label>Pilih Studio</label>
+                <select value={scheduleFormData.studioName} onChange={e => setScheduleFormData({...scheduleFormData, studioName: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none', marginBottom: '15px', fontSize: '15px' }}>
+                  <option value="" disabled>-- Pilih Studio --</option>
+                  {studios.filter(s => s.status === 'Tersedia').map(studio => (
+                    <option key={studio.id} value={studio.name}>{studio.name}</option>
+                  ))}
+                </select>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label>Tanggal Tayang</label>
+                    <input type="date" value={scheduleFormData.date} onChange={e => setScheduleFormData({...scheduleFormData, date: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none' }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label>Jam Tayang</label>
+                    <input type="time" value={scheduleFormData.time} onChange={e => setScheduleFormData({...scheduleFormData, time: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none' }} />
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn-cancel" onClick={() => setShowScheduleForm(false)}>Batal</button>
+                  <button type="submit" className="btn-save">Simpan Jadwal</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 🌟 MODAL FORM EDIT JADWAL */}
+        {showEditScheduleModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ backgroundColor: '#0b0f19', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '500px', border: '1px solid #1f2937' }} className="page-transition">
+              <h2 style={{ marginTop: 0, marginBottom: '20px' }}>Edit Jadwal Tayang</h2>
+              <form onSubmit={handleEditScheduleSubmit} className="admin-form">
                 
                 <label>Judul Film</label>
                 <input 
                   type="text" 
-                  value={scheduleFormData.movieTitle} 
-                  onChange={e => setScheduleFormData({...scheduleFormData, movieTitle: e.target.value})} 
-                  placeholder="Contoh: Petaka Gunung Welirang" required style={{ marginBottom: '15px' }}
+                  value={editingSchedule.movieTitle} 
+                  onChange={e => setEditingSchedule({...editingSchedule, movieTitle: e.target.value})} 
+                  required 
+                  style={{ marginBottom: '15px' }}
                 />
 
                 <label>Pilih Studio</label>
                 <select 
-                  value={scheduleFormData.studioName}
-                  onChange={e => setScheduleFormData({...scheduleFormData, studioName: e.target.value})}
-                  required
-                  style={{
-                    width: '100%', padding: '12px', borderRadius: '8px', 
-                    backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', 
-                    outline: 'none', marginBottom: '15px', fontSize: '15px'
-                  }}
+                  value={editingSchedule.studioName} 
+                  onChange={e => setEditingSchedule({...editingSchedule, studioName: e.target.value})} 
+                  required 
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none', marginBottom: '15px', fontSize: '15px' }}
                 >
-                  <option value="" disabled>-- Pilih Studio --</option>
-                  {/* Hanya menampilkan studio yang berstatus 'Tersedia' */}
-                  {studios.filter(s => s.status === 'Tersedia').map(studio => (
-                    <option key={studio.id} value={studio.name}>{studio.name}</option>
+                  {/* Menampilkan studio aktif saat ini serta daftar studio lain yang berstatus 'Tersedia' */}
+                  {studios.map(studio => (
+                    <option key={studio.id} value={studio.name} disabled={studio.status !== 'Tersedia' && studio.name !== editingSchedule.studioName}>
+                      {studio.name} {studio.status !== 'Tersedia' ? '(Nonaktif)' : ''}
+                    </option>
                   ))}
                 </select>
 
@@ -327,35 +392,27 @@ export default function AdminStudioPage() {
                     <label>Tanggal Tayang</label>
                     <input 
                       type="date" 
-                      value={scheduleFormData.date} 
-                      onChange={e => setScheduleFormData({...scheduleFormData, date: e.target.value})} 
+                      value={editingSchedule.date} 
+                      onChange={e => setEditingSchedule({...editingSchedule, date: e.target.value})} 
                       required 
-                      style={{ 
-                        width: '100%', padding: '12px', borderRadius: '8px', 
-                        backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', 
-                        outline: 'none', boxSizing: 'border-box' 
-                      }}
+                      style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none' }} 
                     />
                   </div>
                   <div style={{ flex: 1 }}>
                     <label>Jam Tayang</label>
                     <input 
                       type="time" 
-                      value={scheduleFormData.time} 
-                      onChange={e => setScheduleFormData({...scheduleFormData, time: e.target.value})} 
+                      value={editingSchedule.time} 
+                      onChange={e => setEditingSchedule({...editingSchedule, time: e.target.value})} 
                       required 
-                      style={{ 
-                        width: '100%', padding: '12px', borderRadius: '8px', 
-                        backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', 
-                        outline: 'none', boxSizing: 'border-box' 
-                      }}
+                      style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#1f2937', color: 'white', border: '1px solid #374151', outline: 'none' }} 
                     />
                   </div>
                 </div>
 
                 <div className="form-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setShowScheduleForm(false)}>Batal</button>
-                  <button type="submit" className="btn-save">Simpan Jadwal</button>
+                  <button type="button" className="btn-cancel" onClick={() => setShowEditScheduleModal(false)}>Batal</button>
+                  <button type="submit" className="btn-save" style={{ backgroundColor: '#38bdf8', color: '#0b0f19' }}>Update Jadwal</button>
                 </div>
               </form>
             </div>

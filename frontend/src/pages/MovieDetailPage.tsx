@@ -25,7 +25,6 @@ export default function MovieDetailPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedStudio, setSelectedStudio] = useState<string | null>(null);
 
-  // --- MOCK DATA JADWAL (Nanti bisa diganti dengan data dari API) ---
   const availableDates = [
     { date: '2026-07-07', label: 'Hari Ini' },
     { date: '2026-07-08', label: 'Besok' },
@@ -41,7 +40,6 @@ export default function MovieDetailPage() {
     { id: 6, studioName: 'Studio 1 Ultra XD', time: '14:30', date: '2026-07-08' },
   ];
 
-  // Logic memfilter jadwal berdasarkan tanggal & studio
   const filteredSchedules = mockSchedules.filter(sch => sch.date === selectedDate);
   const schedulesByStudio = filteredSchedules.reduce((acc, curr) => {
     if (!acc[curr.studioName]) acc[curr.studioName] = [];
@@ -50,7 +48,7 @@ export default function MovieDetailPage() {
   }, {} as Record<string, string[]>);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Scroll ke atas saat dibuka
+    window.scrollTo(0, 0); 
 
     const fetchMovieDetail = async () => {
       try {
@@ -61,14 +59,13 @@ export default function MovieDetailPage() {
         }
       } catch (error) {
         console.error("Gagal mengambil detail film:", error);
-        // Data fallback jika API mati
         setMovie({
           id: Number(id),
-          title: 'MINIONS: THE RISE OF GRU',
-          genre: 'Animation, Comedy',
+          title: 'MINIONS & MONSTERS',
+          genre: 'Animations',
           duration: 90,
           price: 50000,
-          description: 'Berlatar tahun 1970-an, Gru yang masih berusia 12 tahun berusaha membuktikan dirinya sebagai calon penjahat super terhebat. Bersama pasukan Minion yang setia, ia menyusun rencana untuk bergabung dengan kelompok penjahat legendaris.',
+          description: 'Petualangan para Minion di Hollywood tahun 1920-an saat mereka mencari makhluk-makhluk menakutkan untuk film monster mereka. Para Minion bekerja sama dengan makhluk hijau untuk menyelamatkan planet ini setelah mereka melepaskan monster-monster berbahaya.',
           posterUrl: 'https://placehold.co/400x600/f59e0b/000000?text=Minions+Poster'
         });
       } finally {
@@ -89,7 +86,6 @@ export default function MovieDetailPage() {
       alert('Silakan pilih jadwal tayang terlebih dahulu!');
       return;
     }
-    // Kirim data film, tanggal, studio, dan jam ke halaman Booking/Kursi
     navigate(`/booking/${movie?.id}`, {
       state: { selectedDate, selectedStudio, selectedTime, movie }
     });
@@ -102,7 +98,6 @@ export default function MovieDetailPage() {
   return (
     <div className="movie-layout-modern">
       
-      {/* 1. NAVBAR FIXED */}
       <nav className="navbar-detail">
         <img 
           src={logoImage} 
@@ -114,7 +109,6 @@ export default function MovieDetailPage() {
 
       {movie && (
         <>
-          {/* 2. BACKGROUND GRADASI DARI POSTER */}
           <div 
             className="hero-backdrop"
             style={{ backgroundImage: `url(${movie.posterUrl})` }}
@@ -122,11 +116,10 @@ export default function MovieDetailPage() {
             <div className="backdrop-overlay"></div>
           </div>
 
-          {/* 3. KONTEN UTAMA */}
           <div className="modern-content-container">
             
+            {/* BARIS 1: POSTER DAN INFO */}
             <div className="movie-header-row">
-              {/* Bagian Kiri: Poster */}
               <div className="poster-small-wrapper">
                 <img 
                   src={movie.posterUrl || 'https://placehold.co/400x600/111827/ffffff?text=NO+POSTER'} 
@@ -135,7 +128,6 @@ export default function MovieDetailPage() {
                 />
               </div>
 
-              {/* Bagian Kanan: Info Film & Jadwal */}
               <div className="movie-info-right">
                 <h1 className="modern-movie-title">{movie.title}</h1>
                 
@@ -147,93 +139,89 @@ export default function MovieDetailPage() {
                   </div>
                 </div>
 
-                <div className="modern-synopsis-section" style={{ marginBottom: '40px' }}>
+                <div className="modern-synopsis-section" style={{ marginBottom: '20px' }}>
                   <h3>Sinopsis</h3>
                   <p className="modern-synopsis-text">{movie.description}</p>
                 </div>
-
-                {/* --- 🌟 BAGIAN BARU: PEMILIHAN JADWAL --- */}
-                <div style={{ backgroundColor: 'rgba(11, 15, 25, 0.6)', padding: '25px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', color: '#f3f4f6', margin: '0 0 20px 0' }}>
-                    <CalendarIcon size={20} className="icon-cyan" /> Pilih Jadwal Tayang
-                  </h3>
-
-                  {/* Tab Tanggal */}
-                  <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', overflowX: 'auto', paddingBottom: '10px' }}>
-                    {availableDates.map(d => (
-                      <button 
-                        key={d.date}
-                        onClick={() => {
-                          setSelectedDate(d.date);
-                          setSelectedTime(null); 
-                          setSelectedStudio(null);
-                        }}
-                        style={{
-                          padding: '12px 20px',
-                          borderRadius: '10px',
-                          border: selectedDate === d.date ? '1px solid #82ebd5' : '1px solid #374151',
-                          backgroundColor: selectedDate === d.date ? 'rgba(130, 235, 213, 0.1)' : 'transparent',
-                          color: selectedDate === d.date ? '#82ebd5' : '#d1d5db',
-                          cursor: 'pointer',
-                          minWidth: '110px',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <div style={{ fontSize: '13px', marginBottom: '4px' }}>{d.label}</div>
-                        <div style={{ fontWeight: 'bold', fontSize: '15px' }}>{d.date.split('-').reverse().join('/')}</div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Daftar Studio & Jam */}
-                  {Object.keys(schedulesByStudio).length > 0 ? (
-                    Object.keys(schedulesByStudio).map(studio => (
-                      <div key={studio} style={{ marginBottom: '20px' }}>
-                        <h4 style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '12px', fontWeight: 'normal' }}>{studio}</h4>
-                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                          {schedulesByStudio[studio].map(time => {
-                            const isSelected = selectedStudio === studio && selectedTime === time;
-                            return (
-                              <button
-                                key={time}
-                                onClick={() => handleTimeSelect(studio, time)}
-                                style={{
-                                  padding: '10px 24px',
-                                  borderRadius: '8px',
-                                  border: isSelected ? 'none' : '1px solid #374151',
-                                  backgroundColor: isSelected ? '#82ebd5' : '#1f2937',
-                                  color: isSelected ? '#0b0f19' : 'white',
-                                  fontWeight: 'bold',
-                                  fontSize: '15px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s'
-                                }}
-                              >
-                                {time}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ color: '#ef4444', padding: '15px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', fontSize: '14px' }}>
-                      Maaf, tidak ada jadwal penayangan untuk tanggal ini.
-                    </div>
-                  )}
-                </div>
-                {/* --- AKHIR BAGIAN PEMILIHAN JADWAL --- */}
-
               </div>
             </div>
+            {/* AKHIR BARIS 1 */}
 
-            {/* 4. MENU TOMBOL AKSI */}
+            {/* BARIS 2: PILIHAN JADWAL (Dikeluarkan dari kolom kanan agar merentang penuh ke kiri) */}
+            <div style={{ backgroundColor: 'rgba(11, 15, 25, 0.6)', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '20px' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', color: '#f3f4f6', margin: '0 0 25px 0' }}>
+                <CalendarIcon size={20} className="icon-cyan" /> Pilih Jadwal Tayang
+              </h3>
+
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', overflowX: 'auto', paddingBottom: '10px' }}>
+                {availableDates.map(d => (
+                  <button 
+                    key={d.date}
+                    onClick={() => {
+                      setSelectedDate(d.date);
+                      setSelectedTime(null); 
+                      setSelectedStudio(null);
+                    }}
+                    style={{
+                      padding: '12px 20px',
+                      borderRadius: '10px',
+                      border: selectedDate === d.date ? '1px solid #82ebd5' : '1px solid #374151',
+                      backgroundColor: selectedDate === d.date ? 'rgba(130, 235, 213, 0.1)' : 'transparent',
+                      color: selectedDate === d.date ? '#82ebd5' : '#d1d5db',
+                      cursor: 'pointer',
+                      minWidth: '110px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', marginBottom: '4px' }}>{d.label}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '15px' }}>{d.date.split('-').reverse().join('/')}</div>
+                  </button>
+                ))}
+              </div>
+
+              {Object.keys(schedulesByStudio).length > 0 ? (
+                Object.keys(schedulesByStudio).map(studio => (
+                  <div key={studio} style={{ marginBottom: '20px' }}>
+                    <h4 style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '12px', fontWeight: 'normal' }}>{studio}</h4>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      {schedulesByStudio[studio].map(time => {
+                        const isSelected = selectedStudio === studio && selectedTime === time;
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => handleTimeSelect(studio, time)}
+                            style={{
+                              padding: '10px 24px',
+                              borderRadius: '8px',
+                              border: isSelected ? 'none' : '1px solid #374151',
+                              backgroundColor: isSelected ? '#82ebd5' : '#1f2937',
+                              color: isSelected ? '#0b0f19' : 'white',
+                              fontWeight: 'bold',
+                              fontSize: '15px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ color: '#ef4444', padding: '15px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', fontSize: '14px' }}>
+                  Maaf, tidak ada jadwal penayangan untuk tanggal ini.
+                </div>
+              )}
+            </div>
+
+            {/* BARIS 3: MENU TOMBOL AKSI */}
             <div className="modern-action-menu">
               <button className="btn-action-cancel" onClick={() => navigate('/')}>
                 Batalkan
               </button>
               
-              {/* Tombol dimatikan (disabled) jika jadwal belum dipilih */}
               <button 
                 className="btn-action-order" 
                 onClick={handleOrder}
