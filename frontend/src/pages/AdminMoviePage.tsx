@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Film, Calendar, LayoutGrid, Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
+import { Film, LayoutGrid, Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
 import logoImage from '../assets/logo.png'; 
 
 export default function AdminMoviePage() {
@@ -27,9 +27,8 @@ export default function AdminMoviePage() {
     }
   };
 
-  // 2. 🌟 FUNGSI UNTUK MENGHAPUS FILM
+  // 2. FUNGSI UNTUK MENGHAPUS FILM
   const handleDelete = async (id: number, title: string) => {
-    // Berikan peringatan agar tidak terhapus tidak sengaja
     const isConfirm = window.confirm(`Apakah Anda yakin ingin menghapus film "${title}"?`);
     
     if (isConfirm) {
@@ -39,12 +38,11 @@ export default function AdminMoviePage() {
         const response = await fetch(`http://localhost:3000/api/movies/${id}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}` // Sertakan token jika backend diproteksi
+            'Authorization': `Bearer ${token}` 
           }
         });
 
         if (response.ok) {
-          // Hapus film dari tabel secara instan tanpa perlu reload halaman
           setMovies(movies.filter((m: any) => m.id !== id));
           alert('Film berhasil dihapus!');
         } else if (response.status === 401 || response.status === 403) {
@@ -71,11 +69,8 @@ export default function AdminMoviePage() {
           <button className="active" onClick={() => navigate('/admin/movies')}>
             <Film size={20} /> Kelola Film
           </button>
-          <button onClick={() => navigate('/admin/schedules')}>
-            <Calendar size={20} /> Kelola Jadwal
-          </button>
           <button onClick={() => navigate('/admin/studios')}>
-            <LayoutGrid size={20} /> Kelola Studio
+            <LayoutGrid size={20} /> Kelola Studio & Jadwal
           </button>
         </nav>
       </aside>
@@ -121,7 +116,6 @@ export default function AdminMoviePage() {
                         <Edit2 size={16} />
                       </button>
                       
-                      {/* 🌟 TOMBOL HAPUS DIHUBUNGKAN KE FUNGSI */}
                       <button 
                         className="btn-delete" 
                         onClick={() => handleDelete(m.id, m.title)}
