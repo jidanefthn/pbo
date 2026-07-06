@@ -16,4 +16,7 @@ export const movies = pgTable("movies", {
   description: text("description"),
 
   posterUrl: text("poster_url"),
+
+  // 🌟 TAMBAHKAN KOLOM HARGA DI SINI
+  price: integer("price").default(0), 
 });
