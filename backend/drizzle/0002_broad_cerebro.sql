@@ -1,0 +1,1 @@
+ALTER TABLE "movies" ADD COLUMN "price" integer DEFAULT 0;
