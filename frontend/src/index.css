@@ -540,6 +540,7 @@ body {
 /* Modifikasi sedikit margin input agar jaraknya pas dengan card yang lebar */
 .mtix-input {
   width: 100%;
+  color: #000;
   padding: 16px 18px; /* Input dibuat sedikit lebih tinggi agar proporsional */
   border: 1px solid #e5e7eb;
   border-radius: 8px;
